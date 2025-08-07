@@ -16,6 +16,8 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type React from "react";
 import Password from "@/components/ui/Password";
+import { useRegisterMutation } from "@/redux/features/auth/auth.api";
+import { toast } from "sonner";
 
 const registerSchema = z
   .object({
@@ -36,6 +38,7 @@ interface RegisterFormProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const RegisterForm = ({ className, ...props }: RegisterFormProps) => {
+  const [register] = useRegisterMutation();
   const form = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -45,8 +48,20 @@ const RegisterForm = ({ className, ...props }: RegisterFormProps) => {
       confirmPassword: "",
     },
   });
-  const onSubmit = (data: z.infer<typeof registerSchema>) => {
-    console.log(data);
+  const onSubmit = async (data: z.infer<typeof registerSchema>) => {
+    const userinfo = {
+      name: data.name,
+      email: data.email,
+      password: data.password,
+    };
+    try {
+      console.log(userinfo);
+      const result = await register(userinfo).unwrap();
+      console.log(result);
+      toast.success("user created successfully");
+    } catch (error) {
+      console.error(error);
+    }
   };
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
