@@ -2,6 +2,7 @@ import Logo from "@/assets/icons/Logo";
 import { Link } from "react-router";
 import TravelRegister from "../assets/images/travel-register.jpg";
 import RegisterForm from "@/components/modules/authentication/RegisterForm";
+
 const Register = () => {
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
