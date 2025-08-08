@@ -1,7 +1,43 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useLoginMutation } from "@/redux/features/auth/auth.api";
+import { useForm } from "react-hook-form";
+import { Link, useNavigate } from "react-router";
+import { toast } from "sonner";
 
 const LoginForm = () => {
+  const form = useForm();
+  const [login] = useLoginMutation();
+  const navigate = useNavigate();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const onSubmit = async (data: any) => {
+    const userinfo = {
+      name: data.name,
+      email: data.email,
+      password: data.password,
+    };
+    try {
+      console.log(userinfo);
+      const result = await login(userinfo).unwrap();
+      console.log(result);
+      toast.success("user Login successfully");
+    } catch (error: any) {
+      if (error.status == 401) {
+        toast.error("your account is not verified");
+        navigate("/verify");
+      }
+    }
+  };
   return (
     <div className={"flex flex-col gap-6"}>
       <div className="flex flex-col items-center gap-2 text-center">
@@ -11,7 +47,7 @@ const LoginForm = () => {
         </p>
       </div>
       <div className="grid gap-6">
-        {/* <Form {...form}>
+        <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
               control={form.control}
@@ -54,7 +90,7 @@ const LoginForm = () => {
               Login
             </Button>
           </form>
-        </Form> */}
+        </Form>
 
         <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
           <span className="relative z-10 bg-background px-2 text-muted-foreground">
