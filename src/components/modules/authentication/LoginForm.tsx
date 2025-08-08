@@ -19,7 +19,6 @@ const LoginForm = () => {
   const [login] = useLoginMutation();
   const navigate = useNavigate();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onSubmit = async (data: any) => {
     const userinfo = {
       name: data.name,
@@ -34,7 +33,7 @@ const LoginForm = () => {
     } catch (error: any) {
       if (error.status == 401) {
         toast.error("your account is not verified");
-        navigate("/verify");
+        navigate("/verify", { state: data.email });
       }
     }
   };
