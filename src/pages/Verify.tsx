@@ -21,7 +21,11 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { useSendOTPMutation } from "@/redux/features/auth/auth.api";
+import { cn } from "@/lib/utils";
+import {
+  useSendOTPMutation,
+  useVerifyOTPMutation,
+} from "@/redux/features/auth/auth.api";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Minus } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -40,6 +44,8 @@ const Verify = () => {
   const [email] = useState(location.state);
   const [confirm, setConfirm] = useState(false);
   const [sendOTP] = useSendOTPMutation();
+  const [verifyOTP] = useVerifyOTPMutation();
+  const [timer, setTimer] = useState(5);
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
@@ -47,21 +53,41 @@ const Verify = () => {
     },
   });
 
-  const handleConfirm = async () => {
+  const handleSendOTP = async () => {
     const toastId = toast.loading("sending OTP");
+
     try {
       const res = await sendOTP({ email: email }).unwrap();
       if (res.success) {
         toast.success("OTP sent Successfully", { id: toastId });
         setConfirm(true);
+        setTimer(5);
       }
     } catch (error) {
       console.log(error);
+      setConfirm(false);
     }
   };
 
-  const onSubmit = (data: z.infer<typeof FormSchema>) => {
-    console.log(data);
+  const onSubmit = async (data: z.infer<typeof FormSchema>) => {
+    const toastId = toast.loading("Verifying OTP");
+    const userInfo = {
+      email,
+      otp: data.pin,
+    };
+
+    try {
+      const res = await verifyOTP(userInfo).unwrap();
+      console.log(res);
+
+      if (res.success) {
+        toast.success("OTP Verified", { id: toastId });
+        setConfirm(true);
+      }
+    } catch (error) {
+      console.log(error);
+      setConfirm(false);
+    }
   };
   // turn of for development
   // useEffect(() => {
@@ -69,6 +95,18 @@ const Verify = () => {
   //     navigate("/");
   //   }
   // }, [email, navigate]);
+
+  useEffect(() => {
+    if (!email || !confirm) {
+      return;
+    }
+    const timerId = setInterval(() => {
+      setTimer((prev) => (prev > 0 ? prev - 1 : 0));
+
+      console.log("prev");
+    }, 1000);
+    return () => clearInterval(timerId);
+  }, [confirm, email]);
 
   return (
     <div className="grid place-content-center h-screen">
@@ -116,7 +154,21 @@ const Verify = () => {
                           </InputOTPGroup>
                         </InputOTP>
                       </FormControl>
-                      <FormDescription></FormDescription>
+                      <FormDescription>
+                        <Button
+                          onClick={handleSendOTP}
+                          type="button"
+                          variant={"link"}
+                          disabled={timer !== 0}
+                          className={cn("p-0 m-0", {
+                            "cursor-pointer": timer == 0,
+                            "text-gray-500": timer !== 0,
+                          })}
+                        >
+                          Resend OTP:
+                        </Button>{" "}
+                        {timer}
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -141,7 +193,7 @@ const Verify = () => {
 
           <CardFooter className="flex justify-end">
             <Button
-              onClick={handleConfirm}
+              onClick={handleSendOTP}
               className="w-[300px]"
               form="otp-form"
             >

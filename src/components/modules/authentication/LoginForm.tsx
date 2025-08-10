@@ -9,6 +9,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { config } from "@/config/config";
 import { useLoginMutation } from "@/redux/features/auth/auth.api";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router";
@@ -31,7 +32,11 @@ const LoginForm = () => {
       console.log(result);
       toast.success("user Login successfully");
     } catch (error: any) {
-      if (error.status == 401) {
+      console.log(error);
+      if (error.data.message === "password dose not match") {
+        toast.error(error.data.message);
+      }
+      if (error.data.message === "user is not verified") {
         toast.error("your account is not verified");
         navigate("/verify", { state: data.email });
       }
@@ -98,6 +103,7 @@ const LoginForm = () => {
         </div>
 
         <Button
+          onClick={() => window.open(`${config.baseUrl}/auth/google`)}
           type="button"
           variant="outline"
           className="w-full cursor-pointer"

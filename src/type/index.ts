@@ -1,4 +1,4 @@
-export type { ISensOTP } from "./auth.type";
+export type { ISensOTP, IVerifyOTP } from "./auth.type";
 
 export interface IResponse<T> {
   success: boolean;
