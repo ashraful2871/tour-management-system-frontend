@@ -1,3 +1,5 @@
+import type { ComponentType } from "react";
+
 export type { ISensOTP, IVerifyOTP } from "./auth.type";
 
 export interface IResponse<T> {
@@ -5,4 +7,13 @@ export interface IResponse<T> {
   statusCode: number;
   message: string;
   data: T;
+}
+
+export interface ISidebarItems {
+  title: string;
+  items: {
+    url: string;
+    title: string;
+    component: ComponentType;
+  }[];
 }
