@@ -1,3 +1,4 @@
+import MultipleImageUploader from "@/components/MultipleImageUploader";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -11,7 +12,6 @@ import {
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -31,44 +31,95 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import type { FileMetadata } from "@/hooks/use-file-upload";
 import { cn } from "@/lib/utils";
 import { useGetDivisionQuery } from "@/redux/features/Division/Division.api";
-import { useGetTourTypeQuery } from "@/redux/features/tour/tour.api";
+import {
+  useAddTourMutation,
+  useGetTourTypeQuery,
+} from "@/redux/features/tour/tour.api";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
-import { useForm } from "react-hook-form";
+import { CalendarIcon, Plus, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { useFieldArray, useForm } from "react-hook-form";
 
 const AddTour = () => {
+  const [images, setImages] = useState<(File | FileMetadata)[] | []>([]);
+
   const form = useForm({
     defaultValues: {
       title: "",
       division: "",
       tourType: "",
+      costFrom: 0,
+      location: "",
       description: "",
       startDate: "",
       endDate: "",
+      included: [{ value: "" }],
+      excluded: [{ value: "" }],
     },
   });
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "included",
+  });
+  const {
+    fields: excludedFields,
+    append: excludedAppend,
+    remove: excludedRemove,
+  } = useFieldArray({
+    control: form.control,
+    name: "excluded",
+  });
+  console.log(fields);
   const { data: tourTypeData } = useGetTourTypeQuery(undefined);
   const { data: divisionData, isLoading: divisionLoading } =
     useGetDivisionQuery(undefined);
 
+  const [addTour] = useAddTourMutation();
   const divisionOptions = divisionData?.data?.map(
     (item: { _id: string; name: string }) => ({
       value: item._id,
       label: item.name,
     })
   );
-  console.log(divisionOptions);
+  const tourTypeOptions = tourTypeData?.data?.map(
+    (item: { _id: string; name: string }) => ({
+      value: item._id,
+      label: item.name,
+    })
+  );
+  // console.log(tourTypeOptions);
+  // console.log(divisionOptions);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleSubmit = (data: any) => {
+  const handleSubmit = async (data: any) => {
+    const convertToNumber = Number(data.costFrom);
+
     const tourData = {
       ...data,
       startDate: new Date(data.startDate).toISOString(),
       endDate: new Date(data.endDate).toISOString(),
+      costFrom: convertToNumber,
+      included: data.included.map((item: { value: string }) => item.value),
+      excluded: data.excluded.map((item: { value: string }) => item.value),
     };
     console.log(tourData);
+
+    const formData = new FormData();
+    formData.append("data", JSON.stringify(tourData));
+
+    images.forEach((image) => formData.append("files", image as File));
+
+    // console.log(formData.getAll);
+
+    // try {
+    //   const res = await addTour(formData).unwrap();
+    //   console.log(res);
+    // } catch (error) {
+    //   console.log(error);
+    // }
   };
 
   return (
@@ -109,6 +160,7 @@ const AddTour = () => {
                         onValueChange={field.onChange}
                         defaultValue={field.value}
                         disabled={divisionLoading}
+                        key={field.value}
                       >
                         <FormControl>
                           <SelectTrigger className="w-full">
@@ -118,7 +170,7 @@ const AddTour = () => {
                         <SelectContent>
                           {divisionOptions?.map(
                             (item: { label: string; value: string }) => (
-                              <SelectItem value={item.value}>
+                              <SelectItem key={item.value} value={item.value}>
                                 {item.label}
                               </SelectItem>
                             )
@@ -138,6 +190,7 @@ const AddTour = () => {
                       <Select
                         onValueChange={field.onChange}
                         defaultValue={field.value}
+                        key={field.value}
                       >
                         <FormControl>
                           <SelectTrigger className="w-full">
@@ -145,17 +198,43 @@ const AddTour = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="m@example.com">
-                            m@example.com
-                          </SelectItem>
-                          <SelectItem value="m@google.com">
-                            m@google.com
-                          </SelectItem>
-                          <SelectItem value="m@support.com">
-                            m@support.com
-                          </SelectItem>
+                          {tourTypeOptions?.map(
+                            (item: { label: string; value: string }) => (
+                              <SelectItem key={item.value} value={item.value}>
+                                {item.label}
+                              </SelectItem>
+                            )
+                          )}
                         </SelectContent>
                       </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="flex gap-5">
+                <FormField
+                  control={form.control}
+                  name="location"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Location</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="costFrom"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cost </FormLabel>
+                      <FormControl>
+                        <Input type="number" {...field} />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -265,9 +344,85 @@ const AddTour = () => {
                     </FormItem>
                   )}
                 />
+                <div className="flex-1 mt-5">
+                  <MultipleImageUploader
+                    onChange={setImages}
+                  ></MultipleImageUploader>
+                </div>
               </div>
               <div className="border-t border-muted w-full "></div>
-              <div></div>
+              <div>
+                <Button
+                  size="icon"
+                  type="button"
+                  onClick={() => append({ value: "" })}
+                >
+                  <Plus></Plus>
+                </Button>
+                <div className="space-y-5 mt-5">
+                  {fields.map((item, idx) => (
+                    <div className="flex gap-2">
+                      <FormField
+                        control={form.control}
+                        name={`included.${idx}.value`}
+                        key={item.id}
+                        render={({ field }) => (
+                          <FormItem className="flex-1">
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <Button
+                        onClick={() => remove(idx)}
+                        size="icon"
+                        variant="outline"
+                        type="button"
+                      >
+                        <Trash2></Trash2>
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <Button
+                  size="icon"
+                  type="button"
+                  onClick={() => excludedAppend({ value: "" })}
+                >
+                  <Plus></Plus>
+                </Button>
+                <div className="space-y-5 mt-5">
+                  {excludedFields.map((item, idx) => (
+                    <div className="flex gap-2">
+                      <FormField
+                        control={form.control}
+                        name={`excluded.${idx}.value`}
+                        key={item.id}
+                        render={({ field }) => (
+                          <FormItem className="flex-1">
+                            <FormControl>
+                              <Input {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <Button
+                        onClick={() => excludedRemove(idx)}
+                        size="icon"
+                        variant="destructive"
+                        type="button"
+                      >
+                        <Trash2></Trash2>
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </form>
           </Form>
         </CardContent>
