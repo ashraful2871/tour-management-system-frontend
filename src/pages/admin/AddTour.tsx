@@ -114,12 +114,12 @@ const AddTour = () => {
 
     // console.log(formData.getAll);
 
-    // try {
-    //   const res = await addTour(formData).unwrap();
-    //   console.log(res);
-    // } catch (error) {
-    //   console.log(error);
-    // }
+    try {
+      const res = await addTour(formData).unwrap();
+      console.log(res);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
