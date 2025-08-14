@@ -7,18 +7,18 @@ export const divisionApi = baseApi.injectEndpoints({
         method: "POST",
         data: divisionData,
       }),
-      invalidatesTags: ["TOUR"],
+      invalidatesTags: ["DIVISION"],
     }),
 
     getDivision: builder.query({
       query: () => ({
-        url: "/tour/tour-type",
+        url: "/division/all-division",
         method: "GET",
       }),
-      providesTags: ["TOUR"],
+      providesTags: ["DIVISION"],
       transformResponse: (response) => response.data,
     }),
   }),
 });
 
-export const { useAddDivisionMutation } = divisionApi;
+export const { useGetDivisionQuery, useAddDivisionMutation } = divisionApi;

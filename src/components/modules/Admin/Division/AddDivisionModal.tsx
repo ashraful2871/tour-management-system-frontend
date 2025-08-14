@@ -110,8 +110,8 @@ export function AddDivisionModal() {
           <DialogClose asChild>
             <Button variant="outline">Cancel</Button>
           </DialogClose>
-          <Button form="add-tour-type" type="submit">
-            Add Tour Type
+          <Button disabled={!image} form="add-tour-type" type="submit">
+            Add Division
           </Button>
         </DialogFooter>
       </DialogContent>
