@@ -15,12 +15,19 @@ import type { TRole } from "@/type";
 import Tours from "@/pages/Tours";
 import TourDetails from "@/pages/TourDetails";
 import Booking from "@/pages/Booking";
+import HomePage from "@/pages/HomePage";
+import Success from "@/pages/payment/Success";
+import Fail from "@/pages/payment/Fail";
 
 export const router = createBrowserRouter([
   {
     Component: App,
     path: "/",
     children: [
+      {
+        Component: HomePage,
+        path: "/",
+      },
       {
         Component: About,
         path: "/about",
@@ -35,7 +42,7 @@ export const router = createBrowserRouter([
       },
       {
         Component: Booking,
-        path: "/booking",
+        path: "/booking/:id",
       },
     ],
   },
@@ -71,5 +78,13 @@ export const router = createBrowserRouter([
   {
     Component: Unauthorized,
     path: "/unauthorized",
+  },
+  {
+    Component: Success,
+    path: "/payment/success",
+  },
+  {
+    Component: Fail,
+    path: "/payment/fail",
   },
 ]);

@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 
 export type { ISensOTP, IVerifyOTP } from "./auth.type";
+export type { ITourPackage } from "./tour,type";
 
 export interface IResponse<T> {
   success: boolean;
