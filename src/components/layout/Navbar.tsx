@@ -27,6 +27,7 @@ const navigationLinks = [
   { href: "/about", label: "About", role: "PUBLIC" },
   { href: "/admin", label: "Dashboard", role: role.admin },
   { href: "/user", label: "Dashboard", role: role.user },
+  { href: "/tours", label: "Tours" },
 ];
 
 export default function Navbar() {
