@@ -35,9 +35,8 @@ export default function Navbar() {
   const [logout] = useLogoutMutation();
   const dispatch = useDispatch();
   const handleLogout = async () => {
-    const res = await logout(undefined);
+    await logout(undefined);
     dispatch(authApi.util.resetApiState());
-    console.log(res);
   };
   return (
     <header className="border-b container mx-auto px-4">

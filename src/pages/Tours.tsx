@@ -1,13 +1,17 @@
+import TourFilters from "@/components/modules/Tour/TourFilters";
 import { Button } from "@/components/ui/button";
-import { useGetAllTourQuery } from "@/redux/features/tour/tour.api";
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 
+import { useGetAllTourQuery } from "@/redux/features/tour/tour.api";
 const Tours = () => {
-  const { data } = useGetAllTourQuery(undefined);
-  console.log(data);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const division = searchParams.get("division") || undefined;
+  const tourType = searchParams.get("tourType") || undefined;
+  const { data } = useGetAllTourQuery({ division, tourType });
   return (
     <div className="container mx-auto px-5 py-8 grid grid-cols-12 gap-5">
-      {/* <TourFilters /> */}
+      <TourFilters />
       <div className="col-span-9 w-full">
         {data?.data?.map((item) => (
           <div

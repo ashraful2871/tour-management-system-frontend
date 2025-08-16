@@ -1,16 +1,28 @@
 import { Button } from "@/components/ui/button";
+import { useGetDivisionQuery } from "@/redux/features/Division/Division.api";
 import { useGetAllTourQuery } from "@/redux/features/tour/tour.api";
-import type { ITourPackage } from "@/type";
+import { format } from "date-fns";
 import { Link, useParams } from "react-router";
 
 const TourDetails = () => {
   const { id } = useParams();
   const { data, isLoading } = useGetAllTourQuery({ _id: id });
+
+  const { data: divisionData } = useGetDivisionQuery(
+    {
+      _id: data?.data?.[0]?.division,
+      fields: "name",
+    },
+    {
+      skip: !data,
+    }
+  );
   const tourData = data?.data?.[0];
+  // console.log(divisionData);
   if (isLoading) {
     return <p>Loading.....</p>;
   }
-  console.log(tourData?.data?.[0]);
+  // console.log(tourData?.data?.[0]);
 
   return (
     <div className="container mx-auto p-6">
@@ -41,6 +53,40 @@ const TourDetails = () => {
             className="w-full h-48 object-cover rounded-lg"
           />
         ))}
+      </div>
+
+      {/* Tour Info */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        <div>
+          <h2 className="text-xl font-semibold mb-4">Tour Details</h2>
+          <div className="space-y-2">
+            <p>
+              <strong>Dates:</strong>{" "}
+              {format(new Date(tourData?.startDate), "PP")} -{" "}
+              {format(new Date(tourData?.endDate), "PP")}
+            </p>
+            <p>
+              <strong>Departure:</strong> {tourData?.departureLocation}
+            </p>
+            <p>
+              <strong>Arrival:</strong> {tourData?.arrivalLocation}
+            </p>
+            <p>
+              <strong>Division:</strong> {divisionData?.data[0]?.name}
+            </p>
+            <p>
+              <strong>Tour Type:</strong> {tourData?.tourType}
+            </p>
+            <p>
+              <strong>Min Age:</strong> {tourData?.minAge} years
+            </p>
+          </div>
+        </div>
+
+        <div>
+          <h2 className="text-xl font-semibold mb-4">Description</h2>
+          <p className="text-muted-foreground">{tourData?.description}</p>
+        </div>
       </div>
 
       {/* Amenities & Inclusions */}

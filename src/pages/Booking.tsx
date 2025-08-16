@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useCreateBookingMutation } from "@/redux/features/booking/booking.api";
 import { useGetAllTourQuery } from "@/redux/features/tour/tour.api";
+import { format } from "date-fns";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 
@@ -81,8 +82,8 @@ const Booking = () => {
                 <strong>Location:</strong> {tourData?.location}
               </div>
               <div>
-                <strong>Duration:</strong> {tourData?.startDate} to{" "}
-                {tourData?.endDate}
+                <strong>Duration:</strong> {format(tourData?.startDate, "PP")}{" "}
+                to {format(tourData?.endDate, "PP")}{" "}
               </div>
               <div>
                 <strong>Tour Type:</strong> {tourData?.tourType}
